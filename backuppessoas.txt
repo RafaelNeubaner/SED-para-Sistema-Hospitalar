@@ -1,0 +1,415 @@
+#include "Paciente.hpp"
+#include <iostream>
+
+Paciente::Paciente(std::ifstream &arquivo, Procedimento *pro)
+{
+    arquivo >> this->id;
+    arquivo >> this->alta;
+    arquivo >> this->anoin;
+    arquivo >> this->mesin;
+    arquivo >> this->diain;
+    arquivo >> this->horain;
+    arquivo >> this->grau;
+    arquivo >> this->nmh;
+    arquivo >> this->ntl;
+    arquivo >> this->nei;
+    arquivo >> this->nim;
+    horafila = horain;
+    this->tmin = (nmh * pro->tm + ntl * pro->tt + nei * pro->ti + nim * pro->tim + pro->taten + pro->ttri);
+}
+
+std::string convertemes(int mes)
+{
+    switch (mes)
+    {
+    case 1:
+        return ("Jan");
+        break;
+    case 2:
+        return ("Feb");
+    case 3:
+        return ("Mar");
+        break;
+    case 4:
+        return ("Apr");
+        break;
+    case 5:
+        return("May");
+        break;
+    case 6:
+        return ("Jun");
+        break;
+    case 7:
+        return ("Jul");
+        break;
+    case 8:
+        return ("Aug");
+        break;
+    case 9:
+        return ("Sep");
+        break;
+    case 10:
+        return ("Oct");
+        break;
+    case 11:
+        return ("Nov");
+        break;
+    case 12:
+        return ("Dec");
+        break;
+
+    default:
+        break;
+    }
+}
+
+std::string Paciente::convertedia()
+{
+    switch (mesout)
+    {
+    case 1:
+        if(diaout>31)
+        {
+            diaout - 31;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 2:
+        if ((anoin-2000)%4==0)
+        {
+            if (diaout > 29)
+            {
+                diaout - 29;
+                mesout++;
+            }
+        }
+        else if (diaout > 28)
+        {
+            diaout - 28;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+    case 3:
+        if (diaout > 31)
+        {
+            diaout - 31;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 4:
+        if (diaout > 30)
+        {
+            diaout - 30;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 5:
+        if (diaout > 31)
+        {
+            diaout - 31;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 6:
+        if (diaout > 30)
+        {
+            diaout - 30;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 7:
+        if (diaout > 31)
+        {
+            diaout - 31;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 8:
+        if (diaout > 31)
+        {
+            diaout - 31;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 9:
+        if (diaout > 30)
+        {
+            diaout - 30;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 10:
+        if (diaout > 31)
+        {
+            diaout - 31;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 11:
+        if (diaout > 30)
+        {
+            diaout - 30;
+            mesout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+    case 12:
+        if (diaout > 31)
+        {
+            diaout - 31;
+            mesout = 1;
+            anoout++;
+        }
+        return (diaDaSemana(anoout, mesout, diaout));
+        break;
+
+    default:
+        break;
+    }
+}
+
+void Paciente::retifica()
+{
+    anoout = anoin;
+    diaout = diain;
+    mesout = mesin;
+    sdiain = convertedia();
+    smesin = convertemes(mesin);
+    for (int i = 0; i < 10; i++)
+    {
+        if (horafila > 24)
+        {
+            horafila = horafila - 24;
+            diaout++;
+        }
+    }
+    horaout = converterHoras(horafila);
+    shorain = converterHoras(horain);
+    sdiaout = convertedia();
+    smesin = convertemes(mesin);
+    smesout = convertemes(mesout);
+}
+
+void Paciente::print_paciente(){
+    
+    std::cout << id << " "
+              << sdiain << " "
+              << smesin << " "
+              << diain << " "
+              << shorain << " "
+              << anoin << " "
+              << sdiaout << " "
+              << smesout << " "
+              << diaout << " "
+              << horaout << " "
+              << anoout << " "
+              << horafila << " "
+              << horafila - horain - tesp << " "
+              << tesp << std::endl;
+}
+Paciente::Paciente(){}
+
+void Paciente::contabiliza(Procedimento* procedimento, int x)
+{
+    switch (x)
+    {
+    case 1:
+    {
+        float menor = procedimento->triagem->relogio;
+        int index = 0;
+        for (int i = 0; i < procedimento->ntri; i++)
+        {
+            if (menor > procedimento->triagem[i].relogio)
+            {
+                menor = procedimento->triagem[i].relogio;
+                index = i;
+            }
+        }
+        if (procedimento->triagem[index].relogio <= horafila)
+        {
+            horafila += procedimento->ttri;
+            procedimento->triagem[index].relogio = horafila;
+        }
+        else
+        {
+            tesp += procedimento->triagem[index].relogio - horafila;
+            procedimento->triagem[index].relogio += procedimento->ttri;
+            horafila = procedimento->triagem[index].relogio;
+        }
+    }
+    break;
+    case 2:
+    {
+        float menor = procedimento->atendimento->relogio;
+        int index = 0;
+        for (int i = 0; i < procedimento->naten; i++)
+        {
+            if (menor > procedimento->atendimento[i].relogio)
+            {
+                menor = procedimento->atendimento[i].relogio;
+                index = i;
+            }
+        }
+        if (procedimento->atendimento[index].relogio <= horafila)
+        {
+            horafila += procedimento->taten;
+            procedimento->atendimento[index].relogio = horafila;
+        }
+        else
+        {
+            tesp += procedimento->atendimento[index].relogio - horafila;
+            procedimento->atendimento[index].relogio += procedimento->taten;
+            horafila = procedimento->atendimento[index].relogio;
+        }
+    }
+    break;
+    case 3:
+    {
+        float menor = procedimento->medidas->relogio;
+        int index = 0;
+        for (int i = 0; i < procedimento->nm; i++)
+        {
+            if (menor > procedimento->medidas[i].relogio)
+            {
+                menor = procedimento->medidas[i].relogio;
+                index = i;
+            }
+        }
+        if (procedimento->medidas[index].relogio <= horafila)
+        {
+            horafila += nmh * procedimento->tm;
+            procedimento->medidas[index].relogio = horafila;
+        }
+        else
+        {
+            tesp += procedimento->medidas[index].relogio - horafila;
+            procedimento->medidas[index].relogio += nmh * procedimento->tm;
+            horafila = procedimento->medidas[index].relogio;
+        }
+    }
+    break;
+    case 4:
+    {
+        float menor = procedimento->testes->relogio;
+        int index = 0;
+        for (int i = 0; i < procedimento->nt; i++)
+        {
+            if (menor > procedimento->testes[i].relogio)
+            {
+                menor = procedimento->testes[i].relogio;
+                index = i;
+            }
+        }
+        if (procedimento->testes[index].relogio <= horafila)
+        {
+            horafila += ntl * procedimento->tt;
+            procedimento->testes[index].relogio = horafila;
+        }
+        else
+        {
+            tesp += procedimento->testes[index].relogio - horafila;
+            procedimento->testes[index].relogio += ntl * procedimento->tt;
+            horafila = procedimento->testes[index].relogio;
+        }
+    }
+    break;
+    case 5:
+    {
+        float menor = procedimento->imagem->relogio;
+        int index = 0;
+        for (int i = 0; i < procedimento->ni; i++)
+        {
+            if (menor > procedimento->imagem[i].relogio)
+            {
+                menor = procedimento->imagem[i].relogio;
+                index = i;
+            }
+        }
+        if (procedimento->imagem[index].relogio <= horafila)
+        {
+            horafila += nei * procedimento->ti;
+            procedimento->imagem[index].relogio = horafila;
+        }
+        else
+        {
+            tesp += procedimento->imagem[index].relogio - horafila;
+            procedimento->imagem[index].relogio += nei * procedimento->ti;
+            horafila = procedimento->imagem[index].relogio;
+        }
+    }
+    break;
+    case 6:
+    {
+        float menor = procedimento->instrumentos->relogio;
+        int index = 0;
+        for (int i = 0; i < procedimento->nim; i++)
+        {
+            if (menor > procedimento->instrumentos[i].relogio)
+            {
+                menor = procedimento->instrumentos[i].relogio;
+                index = i;
+            }
+        }
+        if (procedimento->instrumentos[index].relogio <= horafila)
+        {
+            horafila += nim * procedimento->tim;
+            procedimento->instrumentos[index].relogio = horafila;
+        }
+        else
+        {
+            tesp += procedimento->instrumentos[index].relogio - horafila;
+            procedimento->instrumentos[index].relogio += nim * procedimento->tim;
+            horafila = procedimento->instrumentos[index].relogio;
+        }
+    }
+    break;
+
+    default:
+        break;
+    }
+    
+}
+
+void Paciente::conta_hora(Procedimento* procedimento)
+{
+    if(triado == 0)
+    {
+        triado++;
+        contabiliza(procedimento, 1);
+    }
+    else if (atendido == 0)
+    {
+        contabiliza(procedimento, 2);
+        atendido++;
+    }
+    else if (nmh != 0)
+    {
+        contabiliza(procedimento, 3);
+        this->nmh = 0;
+    }
+    else if (ntl != 0)
+    {
+        contabiliza(procedimento, 4);
+        this->ntl = 0;
+    }
+    else if (nei != 0)
+    {
+        contabiliza(procedimento, 5);
+        this->nei = 0;
+    }
+    else if (nim != 0)
+    {
+        contabiliza(procedimento, 6);
+        this->nim = 0;
+    }
+}
+
